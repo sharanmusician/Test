@@ -113,6 +113,33 @@
             width: 100%;
         }
 
+        .qty-control-btn {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #18181b;
+            border: 1px solid var(--neon-green);
+            border-radius: 6px;
+            padding: 2px 6px;
+            width: 100%;
+        }
+
+        .qty-control-btn button {
+            background: transparent;
+            color: var(--neon-green);
+            border: none;
+            font-size: 11px;
+            font-weight: 900;
+            cursor: pointer;
+            padding: 4px 8px;
+        }
+
+        .qty-control-btn span {
+            font-size: 10px;
+            font-weight: 900;
+            color: var(--royal-white);
+        }
+
         .ig-btn {
             background: var(--neon-green); color: black; text-align: center;
             text-decoration: none; font-size: 8px; font-weight: 900;
@@ -160,7 +187,7 @@
 
 <header>
     <a href="merchandise.html" class="logo">Mall of Royal Red Bull</a>
-    <a href="cart.js" class="cart-icon-container">
+    <a href="cart.html" class="cart-icon-container">
         🛒
         <span class="cart-badge hidden" id="cartBadge">0</span>
     </a>
@@ -207,6 +234,27 @@
         }
     }
 
+    function updateCartUI(productId) {
+        const cart = JSON.parse(localStorage.getItem('cart')) || [];
+        const item = cart.find(i => i.id === productId);
+        const container = document.getElementById(`action-container-${productId}`);
+        if (!container) return;
+
+        if (item && item.quantity > 0) {
+            container.innerHTML = `
+                <div class="qty-control-btn">
+                    <button onclick="changeQuantity('${productId}', -1)">-</button>
+                    <span>${item.quantity}</span>
+                    <button onclick="changeQuantity('${productId}', 1)">+</button>
+                </div>
+            `;
+        } else {
+            container.innerHTML = `
+                <button class="cart-btn" onclick="addToCart('${productId}')">Add to Cart</button>
+            `;
+        }
+    }
+
     function addToCart(productId) {
         if (typeof merchandise === 'undefined') return;
         const product = merchandise.find(item => item.id === productId);
@@ -223,6 +271,7 @@
 
         localStorage.setItem('cart', JSON.stringify(cart));
         updateCartBadge();
+        updateCartUI(productId);
 
         // Trigger WhatsApp-style pop animation on the badge
         const badge = document.getElementById('cartBadge');
@@ -230,23 +279,54 @@
         setTimeout(() => badge.classList.remove('pop'), 200);
     }
 
+    function changeQuantity(productId, delta) {
+        let cart = JSON.parse(localStorage.getItem('cart')) || [];
+        let item = cart.find(i => i.id === productId);
+        
+        if (item) {
+            item.quantity = (item.quantity || 1) + delta;
+            if (item.quantity <= 0) {
+                cart = cart.filter(i => i.id !== productId);
+            }
+            localStorage.setItem('cart', JSON.stringify(cart));
+            updateCartBadge();
+            updateCartUI(productId);
+        }
+    }
+
     function renderFoodProducts() {
         if (typeof merchandise === 'undefined') return;
         
         const foodItems = merchandise.filter(item => item.category === "Organic Food");
         const foodGrid = document.getElementById('foodGrid');
+        const cart = JSON.parse(localStorage.getItem('cart')) || [];
         
-        foodGrid.innerHTML = foodItems.map(p => `
-            <div class="card">
-                <div class="img-box"><img src="${p.image}"></div>
-                <div class="p-name">${p.title}</div>
-                <div class="p-price">${p.price}</div>
-                <div class="card-btns">
-                    <button class="cart-btn" onclick="addToCart('${p.id}')">Add to Cart</button>
-                    <a href="https://instagram.com/myfoodproductsputhukkadai" class="ig-btn" onclick="event.stopPropagation()">Order via Instagram</a>
+        foodGrid.innerHTML = foodItems.map(p => {
+            const cartItem = cart.find(i => i.id === p.id);
+            const qty = cartItem ? cartItem.quantity : 0;
+
+            return `
+                <div class="card">
+                    <div class="img-box"><img src="${p.image}"></div>
+                    <div class="p-name">${p.title}</div>
+                    <div class="p-price">${p.price}</div>
+                    <div class="card-btns">
+                        <div id="action-container-${p.id}">
+                            ${qty > 0 ? `
+                                <div class="qty-control-btn">
+                                    <button onclick="changeQuantity('${p.id}', -1)">-</button>
+                                    <span>${qty}</span>
+                                    <button onclick="changeQuantity('${p.id}', 1)">+</button>
+                                </div>
+                            ` : `
+                                <button class="cart-btn" onclick="addToCart('${p.id}')">Add to Cart</button>
+                            `}
+                        </div>
+                        <a href="https://instagram.com/myfoodproductsputhukkadai" class="ig-btn" onclick="event.stopPropagation()">Order via Instagram</a>
+                    </div>
                 </div>
-            </div>
-        `).join('');
+            `;
+        }).join('');
     }
 
     // Initialize on load
@@ -255,5 +335,4 @@
 </script>
 
 </body>
-            </html>
-            
+</html>

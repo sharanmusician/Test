@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Mall of Royal Red Bull</title>
+    <style>
+        :root {
+            --bg-dark: #0a0a0c;        
+            --card-bg: #111114;       
+            --neon-green: #00c853;    
+            --royal-white: #ffffff;
+            --text-gray: #a0a0a0;
+        }
+
+        /* --- PROTECTION & GLOBAL --- */
+        * {
+            -webkit-user-select: none;
+            user-select: none;
+            -webkit-touch-callout: none;
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding-bottom: 70px; 
+            font-family: 'Inter', -apple-system, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--royal-white);
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+        }
+
+        /* --- STICKY HEADER --- */
+        header {
+            background-color: var(--bg-dark);
+            padding: 12px 15px;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 1px solid #1f1f23;
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .logo { font-size: 14px; font-weight: 900; letter-spacing: 1px; text-transform: uppercase; color: var(--neon-green); }
+
+        .search-bar {
+            display: flex;
+            background: #18181b;
+            border-radius: 8px;
+            padding: 2px;
+            border: 1px solid #333;
+        }
+
+        .search-bar input {
+            flex-grow: 1;
+            padding: 10px;
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 14px;
+            outline: none;
+        }
+
+        /* --- AUTO SLIDING HERO --- */
+        .slider-container {
+            width: 100%;
+            height: 180px;
+            overflow: hidden;
+            position: relative;
+            border-bottom: 3px solid var(--neon-green);
+            touch-action: pan-y;
+        }
+
+        .slider-wrapper {
+            display: flex;
+            width: 300%;
+            height: 100%;
+            transition: transform 0.5s ease-in-out;
+        }
+
+        .slide {
+            width: 33.333%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 25px;
+            box-sizing: border-box;
+        }
+
+        .slide:nth-child(1) { background: linear-gradient(45deg, #004d00, #0a0a0c); }
+        .slide:nth-child(2) { background: linear-gradient(45deg, #002e00, #0a0a0c); }
+        .slide:nth-child(3) { background: linear-gradient(45deg, #001a00, #0a0a0c); }
+
+        /* --- CATEGORY BOX GRID --- */
+        .category-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            padding: 15px;
+            background: #0a0a0c;
+        }
+
+        .cat-box {
+            background: var(--card-bg);
+            border: 1px solid #1f1f23;
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+            text-decoration: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .cat-box.active { border-color: var(--neon-green); border-width: 1px; border-style: solid; }
+        .cat-icon { font-size: 24px; }
+        .cat-name { font-size: 12px; font-weight: 700; color: var(--royal-white); text-transform: uppercase; }
+        .cat-status { font-size: 9px; color: var(--neon-green); font-weight: 800; }
+        .locked { opacity: 0.5; cursor: not-allowed; }
+
+        /* --- SECTIONS & CARDS (STRICT SYNC WITH FOOD.HTML) --- */
+        .section-header { padding: 20px 15px 10px; display: flex; align-items: center; gap: 8px; }
+        .accent-bar { width: 4px; height: 18px; background: var(--neon-green); }
+        .section-title { font-size: 15px; font-weight: 800; text-transform: uppercase; }
+
+        .trending-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 0 15px; }
+
+        .card {
+            background: var(--card-bg); border-radius: 12px;
+            padding: 10px; border: 1px solid #1f1f23;
+            display: flex; flex-direction: column;
+            text-decoration: none; color: inherit;
+        }
+
+        .img-box { width: 100%; aspect-ratio: 1/1; border-radius: 8px; overflow: hidden; margin-bottom: 8px; }
+        .img-box img { width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
+
+        .p-name { font-size: 12px; font-weight: 600; height: 32px; overflow: hidden; }
+        .p-price { font-size: 14px; font-weight: 800; color: var(--royal-white); margin-bottom: 10px; }
+        
+        /* BUTTON STYLES COPIED EXACTLY FROM FOOD.HTML */
+        .card-btns { display: flex; flex-direction: column; gap: 5px; margin-top: auto; }
+        
+        .cart-btn {
+            background: transparent; color: var(--neon-green);
+            border: 1px solid var(--neon-green); text-align: center;
+            font-size: 8px; font-weight: 900; padding: 8px 4px;
+            border-radius: 6px; text-transform: uppercase; cursor: pointer;
+            width: 100%;
+        }
+
+        .ig-btn {
+            background: var(--neon-green); color: black; text-align: center;
+            text-decoration: none; font-size: 8px; font-weight: 900;
+            padding: 8px 4px; border-radius: 6px; text-transform: uppercase;
+            width: 100%;
+        }
+
+        /* --- COMPRESSED NAVIGATION --- */
+        .bottom-nav {
+            position: fixed; 
+            bottom: 0; 
+            width: 100%; 
+            background: #0f0f12;
+            display: flex; 
+            justify-content: space-around; 
+            padding: 10px 0; 
+            border-top: 1px solid #1f1f23; 
+            z-index: 1001; 
+            align-items: center;
+        }
+
+        .nav-item { 
+            color: var(--text-gray); 
+            text-decoration: none; 
+            font-size: 10px; 
+            text-align: center;
+            line-height: 1;
+        }
+
+        .nav-item.active { 
+            color: var(--neon-green); 
+        }
+
+        .nav-item img.logo-circle {
+            width: 34px; 
+            height: 34px; 
+            border-radius: 50%; 
+            object-fit: cover; 
+            border: 1px solid #333; 
+            vertical-align: middle;
+        }
+
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="header-top">
+        <div class="logo">Mall of Royal Red Bull</div>
+        <a href="cart.html" style="text-decoration: none; font-size: 22px;">🛒</a>
+    </div>
+    <div class="search-bar">
+        <input type="text" placeholder="Search Organic Provisions...">
+        <div style="padding: 10px;">🔍</div>
+    </div>
+</header>
+
+<div class="slider-container" id="sliderContainer">
+    <div class="slider-wrapper" id="slider">
+        <div class="slide">
+            <h2 style="margin:0;">MY Food<br><span style="color:var(--neon-green)">Products</span></h2>
+            <p style="font-size: 12px; color: var(--text-gray);">New Arrivals from munchirai YMCA Trust</p>
+        </div>
+        <div class="slide">
+            <h2 style="margin:0;">Royal<br><span style="color:var(--neon-green)">Streetwear</span></h2>
+            <p style="font-size: 12px; color: var(--text-gray);">Exclusive Merch Coming Soon</p>
+        </div>
+        <div class="slide">
+            <h2 style="margin:0;">Premium<br><span style="color:var(--neon-green)">Accessories</span></h2>
+            <p style="font-size: 12px; color: var(--text-gray);">Crafted for the Royal Lifestyle</p>
+        </div>
+    </div>
+</div>
+
+<div class="category-grid">
+    <a href="food.html" class="cat-box active">
+        <span class="cat-icon">🌿</span>
+        <span class="cat-name">Organic Provisions</span>
+        <span class="cat-status">AVAILABLE NOW</span>
+    </a>
+    <div class="cat-box locked">
+        <span class="cat-icon">👕</span>
+        <span class="cat-name">Clothing</span>
+        <span class="cat-status" style="color:#444">COMING SOON</span>
+    </div>
+    <div class="cat-box locked">
+        <span class="cat-icon">⌚</span>
+        <span class="cat-name">Accessories</span>
+        <span class="cat-status" style="color:#444">COMING SOON</span>
+    </div>
+    <div class="cat-box locked">
+        <span class="cat-icon">👟</span>
+        <span class="cat-name">Shoes</span>
+        <span class="cat-status" style="color:#444">COMING SOON</span>
+    </div>
+</div>
+
+<div class="section-header">
+    <div class="accent-bar"></div>
+    <div class="section-title">Trending Now</div>
+</div>
+
+<div class="trending-grid" id="trendingGrid"></div>
+
+<div class="bottom-nav">
+    <a href="merchandise.html" class="nav-item active">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" style="margin-bottom: 4px;"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"></path></svg>
+        <br>Home
+    </a>
+    <a href="bestsellers.html" class="nav-item">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" style="margin-bottom: 4px;"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"></path></svg>
+        <br>Best Sellers
+    </a>
+    <a href="store.html" class="nav-item">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" style="margin-bottom: 4px;"><path d="M20 4H4v2h16V4zm1 10v-2l-1-5H4l-1 5v2h1v6h10v-6h4v6h2v-6h2v-6h1zm-9 4H6v-4h6v4z"></path></svg>
+        <br>Visit Store
+    </a>
+    <a href="index.html" class="nav-item">
+        <img src="logo.png" class="logo-circle" alt="Logo">
+    </a>
+</div>
+
+<script src="products.js"></script>
+<script>
+    // Slider Logic
+    let currentSlide = 0;
+    const slider = document.getElementById('slider');
+    const container = document.getElementById('sliderContainer');
+    let startX = 0;
+    let slideTimer = setInterval(nextSlide, 3000);
+
+    function nextSlide() { currentSlide = (currentSlide + 1) % 3; updateSlider(); }
+    function prevSlide() { currentSlide = (currentSlide - 1 + 3) % 3; updateSlider(); }
+    function updateSlider() { slider.style.transform = `translateX(-${currentSlide * 33.333}%)`; }
+
+    container.addEventListener('touchstart', e => {
+        startX = e.touches[0].clientX;
+        clearInterval(slideTimer);
+    });
+
+    container.addEventListener('touchend', e => {
+        let endX = e.changedTouches[0].clientX;
+        if (startX - endX > 50) nextSlide();
+        else if (endX - startX > 50) prevSlide();
+        slideTimer = setInterval(nextSlide, 3000);
+    });
+
+    // Dynamic Trending Logic
+    function renderTrending() {
+        if (typeof merchandise === 'undefined') return;
+        
+        // Filter food products and pick 2 random ones
+        const foodItems = merchandise.filter(item => item.category === "Organic Food");
+        const shuffled = foodItems.sort(() => 0.5 - Math.random());
+        const selected = shuffled.slice(0, 2);
+        
+        const trendingGrid = document.getElementById('trendingGrid');
+        
+        // Render with EXACT button structure and padding from food.html
+        trendingGrid.innerHTML = selected.map(p => `
+            <div class="card" onclick="window.location.href='food.html?id=${p.id}'">
+                <div class="img-box"><img src="${p.image}"></div>
+                <div class="p-name">${p.title}</div>
+                <div class="p-price">${p.price}</div>
+                <div class="card-btns">
+                    <button class="cart-btn" onclick="event.stopPropagation(); alert('Item Added to Cart!')">Add to Cart</button>
+                    <a href="https://instagram.com/myfoodproductsputhukkadai" class="ig-btn" onclick="event.stopPropagation()">Order via Instagram</a>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    renderTrending();
+</script>
+
+</body>
+  </html>

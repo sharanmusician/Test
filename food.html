@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Organic Food | Mall of Royal Red Bull</title>
+    <style>
+        :root {
+            --bg-dark: #0a0a0c;        
+            --card-bg: #111114;       
+            --neon-green: #00c853;    
+            --royal-white: #ffffff;
+            --text-gray: #a0a0a0;
+            --badge-red: #ff3b30;
+        }
+
+        /* --- PROTECTION & GLOBAL --- */
+        * {
+            -webkit-user-select: none;
+            user-select: none;
+            -webkit-touch-callout: none;
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding-bottom: 70px; /* STRICT SYNC */
+            font-family: 'Inter', -apple-system, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--royal-white);
+            scroll-behavior: smooth;
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+        }
+
+        /* --- HEADER --- */
+        header {
+            background-color: var(--bg-dark);
+            padding: 12px 15px;
+            position: sticky; top: 0; z-index: 1000;
+            border-bottom: 1px solid #1f1f23;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+
+        .back-btn { color: var(--neon-green); text-decoration: none; font-size: 13px; font-weight: 800; text-transform: uppercase; }
+
+        /* --- CART ICON WITH WHATSAPP-STYLE BADGE --- */
+        .cart-icon-container {
+            position: relative;
+            text-decoration: none;
+            font-size: 22px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 4px;
+        }
+
+        .cart-badge {
+            position: absolute;
+            top: -2px;
+            right: -6px;
+            background-color: var(--badge-red);
+            color: white;
+            font-size: 10px;
+            font-weight: 800;
+            padding: 1px 5px;
+            border-radius: 10px;
+            min-width: 18px;
+            height: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            transform: scale(1);
+            transition: transform 0.2s ease-in-out;
+        }
+
+        .cart-badge.pop {
+            transform: scale(1.3);
+        }
+
+        .cart-badge.hidden {
+            display: none;
+        }
+
+        /* --- PRODUCT DETAIL SECTION --- */
+        #detailView {
+            display: none;
+            padding: 20px 15px;
+            background: linear-gradient(to bottom, #111114, #0a0a0c);
+            border-bottom: 2px solid #1f1f23;
+        }
+
+        .detail-img { width: 100%; border-radius: 15px; aspect-ratio: 1/1; object-fit: cover; border: 1px solid #1f1f23; }
+        .detail-title { font-size: 24px; font-weight: 800; margin: 15px 0 5px 0; }
+        .detail-price { font-size: 20px; color: var(--neon-green); font-weight: 800; margin-bottom: 10px; }
+        .detail-desc { font-size: 14px; line-height: 1.6; color: var(--text-gray); margin-bottom: 20px; }
+
+        .btn-group { display: flex; flex-direction: column; gap: 8px; }
+        
+        .cart-btn {
+            background: transparent; color: var(--neon-green);
+            border: 1px solid var(--neon-green); text-align: center;
+            font-size: 11px; font-weight: 900; padding: 12px;
+            border-radius: 8px; text-transform: uppercase; cursor: pointer;
+            width: 100%;
+        }
+
+        .qty-control-btn {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #18181b;
+            border: 1px solid var(--neon-green);
+            border-radius: 6px;
+            padding: 2px 6px;
+            width: 100%;
+        }
+
+        .qty-control-btn button {
+            background: transparent;
+            color: var(--neon-green);
+            border: none;
+            font-size: 11px;
+            font-weight: 900;
+            cursor: pointer;
+            padding: 4px 8px;
+        }
+
+        .qty-control-btn span {
+            font-size: 10px;
+            font-weight: 900;
+            color: var(--royal-white);
+        }
+
+        .ig-btn {
+            background: var(--neon-green); color: black; text-align: center;
+            text-decoration: none; font-size: 11px; font-weight: 900;
+            padding: 12px; border-radius: 8px; text-transform: uppercase;
+        }
+
+        /* --- BRANDED SECTION LABEL --- */
+        .brand-container { padding: 25px 15px 10px; text-align: center; }
+        .brand-main { font-size: 18px; font-weight: 900; text-transform: uppercase; color: var(--royal-white); letter-spacing: 1.5px; margin: 0; }
+        .brand-sub { font-size: 10px; font-weight: 600; text-transform: uppercase; color: var(--neon-green); letter-spacing: 0.5px; margin-top: 4px; opacity: 0.9; }
+        
+        .product-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            padding: 15px;
+        }
+
+        .card {
+            background: var(--card-bg); border-radius: 12px;
+            padding: 10px; border: 1px solid #1f1f23;
+            display: flex; flex-direction: column;
+        }
+
+        .img-box { width: 100%; aspect-ratio: 1/1; border-radius: 8px; overflow: hidden; margin-bottom: 8px; }
+        .img-box img { width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
+
+        .p-name { font-size: 12px; font-weight: 600; height: 32px; overflow: hidden; }
+        .p-price { font-size: 14px; font-weight: 800; color: var(--royal-white); margin-bottom: 10px; }
+        
+        .card-btns { display: flex; flex-direction: column; gap: 5px; margin-top: auto; }
+        .card-btns .cart-btn, .card-btns .ig-btn { padding: 8px 4px; font-size: 8px; border-radius: 6px; }
+
+        /* --- COMPRESSED NAVIGATION (STRICT SYNC) --- */
+        .bottom-nav {
+            position: fixed; 
+            bottom: 0; 
+            width: 100%; 
+            background: #0f0f12;
+            display: flex; 
+            justify-content: space-around; 
+            padding: 10px 0; 
+            border-top: 1px solid #1f1f23; 
+            z-index: 1001; 
+            align-items: center;
+        }
+
+        .nav-item { 
+            color: var(--text-gray); 
+            text-decoration: none; 
+            font-size: 10px; 
+            text-align: center;
+            line-height: 1; /* Compressed spacing */
+        }
+
+        .nav-item.active { 
+            color: var(--neon-green); 
+        }
+
+        .nav-item img.logo-circle {
+            width: 34px; 
+            height: 34px; 
+            border-radius: 50%; 
+            object-fit: cover; 
+            border: 1px solid #333; 
+            vertical-align: middle;
+        }
+
+    </style>
+</head>
+<body>
+
+<header>
+    <a href="merchandise.html" class="back-btn" id="headerBack">← BACK</a>
+    <div style="font-weight: 900; font-size: 14px; letter-spacing: 1px;">ORGANIC FOOD</div>
+    <a href="cart.html" class="cart-icon-container">
+        🛒
+        <span class="cart-badge hidden" id="cartBadge">0</span>
+    </a>
+</header>
+
+<div id="detailView">
+    <img id="dImg" class="detail-img" src="">
+    <h2 id="dTitle" class="detail-title"></h2>
+    <div id="dPrice" class="detail-price"></div>
+    <p id="dDesc" class="detail-desc"></p>
+    <div class="btn-group">
+        <div id="detail-action-container"></div>
+        <a id="dIG" href="" class="ig-btn" onclick="event.stopPropagation()">Order via Instagram</a>
+    </div>
+</div>
+
+<div class="brand-container">
+    <h2 class="brand-main" id="brandMain">MY Food Products</h2>
+    <div class="brand-sub">A Unit of munchirai YMCA Trust</div>
+</div>
+
+<div class="product-container" id="foodGrid"></div>
+
+<div class="bottom-nav">
+    <a href="merchandise.html" class="nav-item">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" style="margin-bottom: 4px;"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"></path></svg>
+        <br>Home
+    </a>
+    <a href="bestsellers.html" class="nav-item">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" style="margin-bottom: 4px;"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"></path></svg>
+        <br>Best Sellers
+    </a>
+    <a href="store.html" class="nav-item">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" style="margin-bottom: 4px;"><path d="M20 4H4v2h16V4zm1 10v-2l-1-5H4l-1 5v2h1v6h10v-6h4v6h2v-6h2v-6h1zm-9 4H6v-4h6v4z"></path></svg>
+        <br>Visit Store
+    </a>
+    <a href="index.html" class="nav-item">
+        <img src="logo.png" class="logo-circle" alt="Logo">
+    </a>
+</div>
+
+<script src="products.js"></script>
+<script>
+    document.addEventListener('contextmenu', event => event.preventDefault());
+    document.onkeydown = function(e) {
+        if (e.ctrlKey && (e.keyCode === 67 || e.keyCode === 85 || e.keyCode === 73)) return false;
+    };
+
+    const foodGrid = document.getElementById('foodGrid');
+    const detailView = document.getElementById('detailView');
+    const brandMain = document.getElementById('brandMain');
+    let currentDetailId = null;
+
+    function updateCartBadge() {
+        const cart = JSON.parse(localStorage.getItem('cart')) || [];
+        const totalCount = cart.reduce((sum, item) => sum + (item.quantity || 1), 0);
+        const badge = document.getElementById('cartBadge');
+        
+        if (totalCount > 0) {
+            badge.textContent = totalCount > 99 ? '99+' : totalCount;
+            badge.classList.remove('hidden');
+        } else {
+            badge.classList.add('hidden');
+        }
+    }
+
+    function updateCartUI(productId) {
+        const cart = JSON.parse(localStorage.getItem('cart')) || [];
+        const item = cart.find(i => i.id === productId);
+        
+        // Update list card container if present
+        const container = document.getElementById(`action-container-${productId}`);
+        if (container) {
+            if (item && item.quantity > 0) {
+                container.innerHTML = `
+                    <div class="qty-control-btn">
+                        <button onclick="event.stopPropagation(); changeQuantity('${productId}', -1)">-</button>
+                        <span>${item.quantity}</span>
+                        <button onclick="event.stopPropagation(); changeQuantity('${productId}', 1)">+</button>
+                    </div>
+                `;
+            } else {
+                container.innerHTML = `
+                    <button class="cart-btn" onclick="event.stopPropagation(); addToCart('${productId}')">Add to Cart</button>
+                `;
+            }
+        }
+
+        // Update detail view container if matching current detail product
+        if (currentDetailId === productId) {
+            const detailContainer = document.getElementById('detail-action-container');
+            if (detailContainer) {
+                if (item && item.quantity > 0) {
+                    detailContainer.innerHTML = `
+                        <div class="qty-control-btn" style="padding: 6px 12px;">
+                            <button onclick="changeQuantity('${productId}', -1)">-</button>
+                            <span style="font-size: 13px;">${item.quantity}</span>
+                            <button onclick="changeQuantity('${productId}', 1)">+</button>
+                        </div>
+                    `;
+                } else {
+                    detailContainer.innerHTML = `
+                        <button class="cart-btn" onclick="addToCart('${productId}')">Add to Cart</button>
+                    `;
+                }
+            }
+        }
+    }
+
+    function addToCart(productId) {
+        if (typeof merchandise === 'undefined') return;
+        const product = merchandise.find(item => item.id === productId);
+        if (!product) return;
+
+        let cart = JSON.parse(localStorage.getItem('cart')) || [];
+        let existingItem = cart.find(item => item.id === productId);
+        
+        if (existingItem) {
+            existingItem.quantity = (existingItem.quantity || 1) + 1;
+        } else {
+            cart.push({ ...product, quantity: 1 });
+        }
+
+        localStorage.setItem('cart', JSON.stringify(cart));
+        updateCartBadge();
+        updateCartUI(productId);
+
+        const badge = document.getElementById('cartBadge');
+        badge.classList.add('pop');
+        setTimeout(() => badge.classList.remove('pop'), 200);
+    }
+
+    function changeQuantity(productId, delta) {
+        let cart = JSON.parse(localStorage.getItem('cart')) || [];
+        let item = cart.find(i => i.id === productId);
+        
+        if (item) {
+            item.quantity = (item.quantity || 1) + delta;
+            if (item.quantity <= 0) {
+                cart = cart.filter(i => i.id !== productId);
+            }
+            localStorage.setItem('cart', JSON.stringify(cart));
+            updateCartBadge();
+            updateCartUI(productId);
+        }
+    }
+
+    function renderItems(excludeId = null) {
+        if (typeof merchandise === 'undefined') return;
+        const foodItems = merchandise.filter(item => 
+            item.category === "Organic Food" && item.id !== excludeId
+        );
+        const cart = JSON.parse(localStorage.getItem('cart')) || [];
+
+        foodGrid.innerHTML = foodItems.map(p => {
+            const cartItem = cart.find(i => i.id === p.id);
+            const qty = cartItem ? cartItem.quantity : 0;
+
+            return `
+                <div class="card" onclick="showProduct('${p.id}')">
+                    <div class="img-box"><img src="${p.image}"></div>
+                    <div class="p-name">${p.title}</div>
+                    <div class="p-price">${p.price}</div>
+                    <div class="card-btns">
+                        <div id="action-container-${p.id}">
+                            ${qty > 0 ? `
+                                <div class="qty-control-btn">
+                                    <button onclick="event.stopPropagation(); changeQuantity('${p.id}', -1)">-</button>
+                                    <span>${qty}</span>
+                                    <button onclick="event.stopPropagation(); changeQuantity('${p.id}', 1)">+</button>
+                                </div>
+                            ` : `
+                                <button class="cart-btn" onclick="event.stopPropagation(); addToCart('${p.id}')">Add to Cart</button>
+                            `}
+                        </div>
+                        <a href="https://instagram.com/myfoodproductsputhukkadai" class="ig-btn" onclick="event.stopPropagation()">Order via Instagram</a>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    function showProduct(id) {
+        const p = merchandise.find(item => item.id === id);
+        if (!p) return;
+        
+        currentDetailId = id;
+        document.getElementById('dImg').src = p.image;
+        document.getElementById('dTitle').innerText = p.title;
+        document.getElementById('dPrice').innerText = p.price;
+        document.getElementById('dDesc').innerText = p.description;
+        document.getElementById('dIG').href = "https://instagram.com/myfoodproductsputhukkadai";
+        
+        updateCartUI(id);
+
+        detailView.style.display = 'block';
+        brandMain.innerText = "Suggested for you";
+        
+        renderItems(id);
+        
+        window.scrollTo({top: 0, behavior: 'smooth'});
+        
+        const backBtn = document.getElementById('headerBack');
+        backBtn.innerText = "← CLOSE VIEW";
+        backBtn.href = "javascript:closeDetail()";
+        
+        if (!history.state || history.state.view !== 'detail') {
+            history.pushState({ view: 'detail' }, '');
+        }
+    }
+
+    function closeDetail() {
+        currentDetailId = null;
+        detailView.style.display = 'none';
+        brandMain.innerText = "MY Food Products";
+        renderItems();
+        const backBtn = document.getElementById('headerBack');
+        backBtn.innerText = "← BACK";
+        backBtn.href = "merchandise.html";
+        if (history.state && history.state.view === 'detail') history.back();
+    }
+
+    window.onpopstate = function(event) {
+        if (detailView.style.display === 'block') {
+            currentDetailId = null;
+            detailView.style.display = 'none';
+            brandMain.innerText = "MY Food Products";
+            renderItems();
+            const backBtn = document.getElementById('headerBack');
+            backBtn.innerText = "← BACK";
+            backBtn.href = "merchandise.html";
+        }
+    };
+
+    renderItems();
+    updateCartBadge();
+
+    window.addEventListener('DOMContentLoaded', () => {
+        const params = new URLSearchParams(window.location.search);
+        const productId = params.get('id');
+        if (productId) {
+            showProduct(productId); 
+        }
+    });
+</script>
+</body>
+  </html>

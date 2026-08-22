@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sharan Musician | Artist Booking & Official Hub</title>
+    <link rel="icon" type="image/png" href="logo.png">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@300;400;500;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
     <style>
         /* ================= GLOBAL ================= */
@@ -115,33 +116,6 @@
     display: none;
 }
 
-                .qty-control-btn {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            background: #18181b;
-            border: 1px solid var(--neon-green);
-            border-radius: 6px;
-            padding: 2px 4px;
-            width: 100%;
-        }
-
-        .qty-control-btn button {
-            background: transparent;
-            color: var(--neon-green);
-            border: none;
-            font-size: 9px;
-            font-weight: 900;
-            cursor: pointer;
-            padding: 2px 6px;
-        }
-
-        .qty-control-btn span {
-            font-size: 9px;
-            font-weight: 900;
-            color: var(--royal-white);
-        }
-
         /* ================= NAVIGATION ================= */
         nav { 
             display: flex; 
@@ -238,6 +212,34 @@
             background: #00c853; color: black; text-align: center;
             text-decoration: none; font-size: 8px; font-weight: 900;
             padding: 8px 4px; border-radius: 6px; text-transform: uppercase;
+        }
+
+        /* ================= QUANTITY CONTROLS ================= */
+        .qty-control-btn {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #18181b;
+            border: 1px solid var(--neon-green, #00c853);
+            border-radius: 6px;
+            padding: 2px 4px;
+            width: 100%;
+        }
+
+        .qty-control-btn button {
+            background: transparent;
+            color: var(--neon-green, #00c853);
+            border: none;
+            font-size: 9px;
+            font-weight: 900;
+            cursor: pointer;
+            padding: 2px 6px;
+        }
+
+        .qty-control-btn span {
+            font-size: 9px;
+            font-weight: 900;
+            color: var(--royal-white, #fff);
         }
 
         /* ================= NEWS CARD ================= */
@@ -376,17 +378,96 @@
         
         if (typeof merchandise !== 'undefined') {
             const items = merchandise.filter(m => featuredIDs.includes(m.id));
-            grid.innerHTML = items.map(p => `
-                <div class="card" onclick="goToProduct('${p.id}')">
-                    <div class="img-box"><img src="${p.image}"></div>
-                    <div class="p-name">${p.title}</div>
-                    <div class="p-price">${p.price}</div>
-                    <div class="card-btns">
-                        <button class="cart-btn" onclick="event.stopPropagation(); alert('Added!')">Add to Cart</button>
-                        <a href="https://instagram.com/myfoodproductsputhukkadai" class="ig-btn" onclick="event.stopPropagation()">Order via Instagram</a>
+            const cart = JSON.parse(localStorage.getItem('cart')) || [];
+            
+            grid.innerHTML = items.map(p => {
+                const cartItem = cart.find(i => i.id === p.id);
+                const qty = cartItem ? cartItem.quantity : 0;
+
+                return `
+                    <div class="card" onclick="goToProduct('${p.id}')">
+                        <div class="img-box"><img src="${p.image}"></div>
+                        <div class="p-name">${p.title}</div>
+                        <div class="p-price">${p.price}</div>
+                        <div class="card-btns">
+                            <div id="featured-action-${p.id}">
+                                ${qty > 0 ? `
+                                    <div class="qty-control-btn">
+                                        <button onclick="event.stopPropagation(); changeQuantity('${p.id}', -1)">-</button>
+                                        <span>${qty}</span>
+                                        <button onclick="event.stopPropagation(); changeQuantity('${p.id}', 1)">+</button>
+                                    </div>
+                                ` : `
+                                    <button class="cart-btn" onclick="event.stopPropagation(); addToCartFromFeatured('${p.id}')">Add to Cart</button>
+                                `}
+                            </div>
+                            <a href="https://instagram.com/myfoodproductsputhukkadai" class="ig-btn" onclick="event.stopPropagation()">Order via Instagram</a>
+                        </div>
                     </div>
-                </div>
-            `).join('');
+                `;
+            }).join('');
+        }
+    }
+
+    function updateFeaturedCardUI(productId) {
+        const cart = JSON.parse(localStorage.getItem('cart')) || [];
+        const item = cart.find(i => i.id === productId);
+        const actionContainer = document.getElementById(`featured-action-${productId}`);
+        
+        if (actionContainer) {
+            if (item && item.quantity > 0) {
+                actionContainer.innerHTML = `
+                    <div class="qty-control-btn">
+                        <button onclick="event.stopPropagation(); changeQuantity('${productId}', -1)">-</button>
+                        <span>${item.quantity}</span>
+                        <button onclick="event.stopPropagation(); changeQuantity('${productId}', 1)">+</button>
+                    </div>
+                `;
+            } else {
+                actionContainer.innerHTML = `
+                    <button class="cart-btn" onclick="event.stopPropagation(); addToCartFromFeatured('${productId}')">Add to Cart</button>
+                `;
+            }
+        }
+    }
+
+    function addToCartFromFeatured(productId) {
+        if (typeof merchandise === 'undefined') return;
+        const product = merchandise.find(item => item.id === productId);
+        if (!product) return;
+
+        let cart = JSON.parse(localStorage.getItem('cart')) || [];
+        let existingItem = cart.find(item => item.id === productId);
+        
+        if (existingItem) {
+            existingItem.quantity = (existingItem.quantity || 1) + 1;
+        } else {
+            cart.push({ ...product, quantity: 1 });
+        }
+
+        localStorage.setItem('cart', JSON.stringify(cart));
+        updateCartBadge();
+        updateFeaturedCardUI(productId);
+
+        const badge = document.getElementById('cartBadge');
+        if (badge) {
+            badge.classList.add('pop');
+            setTimeout(() => badge.classList.remove('pop'), 200);
+        }
+    }
+
+    function changeQuantity(productId, delta) {
+        let cart = JSON.parse(localStorage.getItem('cart')) || [];
+        let item = cart.find(i => i.id === productId);
+        
+        if (item) {
+            item.quantity = (item.quantity || 1) + delta;
+            if (item.quantity <= 0) {
+                cart = cart.filter(i => i.id !== productId);
+            }
+            localStorage.setItem('cart', JSON.stringify(cart));
+            updateCartBadge();
+            updateFeaturedCardUI(productId);
         }
     }
 
@@ -404,104 +485,6 @@
             document.getElementById('date-inject').innerText = item.date.toUpperCase();
         }
     }
-
-        function updateTrendingCardUI(productId) {
-        const cart = JSON.parse(localStorage.getItem('cart')) || [];
-        const item = cart.find(i => i.id === productId);
-        const actionContainer = document.getElementById(`trending-action-${productId}`);
-        
-        if (actionContainer) {
-            if (item && item.quantity > 0) {
-                actionContainer.innerHTML = `
-                    <div class="qty-control-btn">
-                        <button onclick="event.stopPropagation(); changeQuantity('${productId}', -1)">-</button>
-                        <span>${item.quantity}</span>
-                        <button onclick="event.stopPropagation(); changeQuantity('${productId}', 1)">+</button>
-                    </div>
-                `;
-            } else {
-                actionContainer.innerHTML = `
-                    <button class="cart-btn" onclick="event.stopPropagation(); addToCartFromTrending('${productId}')">Add to Cart</button>
-                `;
-            }
-        }
-    }
-
-    function addToCartFromTrending(productId) {
-        if (typeof merchandise === 'undefined') return;
-        const product = merchandise.find(item => item.id === productId);
-        if (!product) return;
-
-        let cart = JSON.parse(localStorage.getItem('cart')) || [];
-        let existingItem = cart.find(item => item.id === productId);
-        
-        if (existingItem) {
-            existingItem.quantity = (existingItem.quantity || 1) + 1;
-        } else {
-            cart.push({ ...product, quantity: 1 });
-        }
-
-        localStorage.setItem('cart', JSON.stringify(cart));
-        updateCartBadge();
-        updateTrendingCardUI(productId);
-
-        const badge = document.getElementById('cartBadge');
-        badge.classList.add('pop');
-        setTimeout(() => badge.classList.remove('pop'), 200);
-    }
-
-    function changeQuantity(productId, delta) {
-        let cart = JSON.parse(localStorage.getItem('cart')) || [];
-        let item = cart.find(i => i.id === productId);
-        
-        if (item) {
-            item.quantity = (item.quantity || 1) + delta;
-            if (item.quantity <= 0) {
-                cart = cart.filter(i => i.id !== productId);
-            }
-            localStorage.setItem('cart', JSON.stringify(cart));
-            updateCartBadge();
-            updateTrendingCardUI(productId);
-        }
-    }
-
-        function renderTrending() {
-        if (typeof merchandise === 'undefined') return;
-        
-        const foodItems = merchandise.filter(item => item.category === "Organic Food");
-        const shuffled = foodItems.sort(() => 0.5 - Math.random());
-        const selected = shuffled.slice(0, 2);
-        const cart = JSON.parse(localStorage.getItem('cart')) || [];
-        
-        const trendingGrid = document.getElementById('trendingGrid');
-        
-        trendingGrid.innerHTML = selected.map(p => {
-            const cartItem = cart.find(i => i.id === p.id);
-            const qty = cartItem ? cartItem.quantity : 0;
-
-            return `
-                <div class="card" onclick="window.location.href='food.html?id=${p.id}'">
-                    <div class="img-box"><img src="${p.image}"></div>
-                    <div class="p-name">${p.title}</div>
-                    <div class="p-price">${p.price}</div>
-                    <div class="card-btns">
-                        <div id="trending-action-${p.id}">
-                            ${qty > 0 ? `
-                                <div class="qty-control-btn">
-                                    <button onclick="event.stopPropagation(); changeQuantity('${p.id}', -1)">-</button>
-                                    <span>${qty}</span>
-                                    <button onclick="event.stopPropagation(); changeQuantity('${p.id}', 1)">+</button>
-                                </div>
-                            ` : `
-                                <button class="cart-btn" onclick="event.stopPropagation(); addToCartFromTrending('${p.id}')">Add to Cart</button>
-                            `}
-                        </div>
-                        <a href="https://instagram.com/myfoodproductsputhukkadai" class="ig-btn" onclick="event.stopPropagation()">Order via Instagram</a>
-                    </div>
-                </div>
-            `;
-        }).join('');
-        }
     
     // ================= CART BADGE =================
     function updateCartBadge() {
@@ -525,17 +508,11 @@
         updateCartBadge();
     });
 
-        window.addEventListener('storage', (event) => {
-        if (event.key === 'cart') {
-            updateCartBadge();
-            renderTrending();
-        }
-    });
-    
     // Listen for storage updates across pages in real time
     window.addEventListener('storage', (event) => {
         if (event.key === 'cart') {
             updateCartBadge();
+            loadFeatured();
         }
     });
 
@@ -547,7 +524,7 @@
     const muteSVG = `<svg viewBox="0 0 24 24" width="28" height="28" fill="white"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"></path></svg>`;
     const unmuteSVG = `<svg viewBox="0 0 24 24" width="28" height="28" fill="white"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"></path></svg>`;
 
-    muteIconContainer.innerHTML = muteSVG;
+ muteIconContainer.innerHTML = muteSVG;
     muteBtn.classList.add('show');
 
     let iconTimeout;

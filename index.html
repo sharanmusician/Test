@@ -54,7 +54,7 @@
         }
         .search-bar button { padding: 10px 22px; background: #1db954; color: #fff; border-radius: 0 8px 8px 0; font-weight: 600; white-space: nowrap; }
 
-                /* --- CART ICON WITH WHATSAPP-STYLE BADGE --- */
+        /* --- CART ICON WITH WHATSAPP-STYLE BADGE --- */
         .cart-icon-container {
             position: relative;
             text-decoration: none;
@@ -92,7 +92,25 @@
         .cart-badge.hidden {
             display: none;
         }
-        
+
+        .search-bar {
+            display: flex;
+            background: #18181b;
+            border-radius: 8px;
+            padding: 2px;
+            border: 1px solid #333;
+        }
+
+        .search-bar input {
+            flex-grow: 1;
+            padding: 10px;
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 14px;
+            outline: none;
+        }
+
         /* ================= ACTION BAR ================= */
         .action-bar {
             display: grid;
@@ -260,10 +278,10 @@
 <div class="action-bar">
     <a href="Catalogue.pdf" target="_blank"><button>Catalogue</button></a>
     <a href="eventbooking.html"><button>Artist Booking</button></a>
-    <a href="cart.html" class="cart-icon-container" style="text-decoration: none; position: relative; display: inline-flex; align-items: center; justify-content: center; padding: 4px;">
-        🛒
-        <span class="cart-badge hidden" id="cartBadge">0</span>
-    </a>
+    <a href="cart.html" class="cart-icon-container">
+            🛒
+            <span class="cart-badge hidden" id="cartBadge">0</span>
+        </a>
 </div>
 
 <nav class="custom-scroll" id="mainNav">  
@@ -446,7 +464,7 @@
         badge.classList.add('pop');
         setTimeout(() => badge.classList.remove('pop'), 200);
     }
-
+        
     // Dynamic Trending Logic
     function renderTrending() {
         if (typeof merchandise === 'undefined') return;

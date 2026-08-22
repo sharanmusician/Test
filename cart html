@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Shopping Cart - Mall of Royal Red Bull</title>
+    <style>
+        :root {
+            --bg-dark: #0a0a0c;        
+            --card-bg: #111114;       
+            --neon-green: #00c853;    
+            --royal-white: #ffffff;
+            --text-gray: #a0a0a0;
+            --badge-red: #ff3b30;
+        }
+
+        * {
+            -webkit-user-select: none;
+            user-select: none;
+            -webkit-touch-callout: none;
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding-bottom: 120px; 
+            font-family: 'Inter', -apple-system, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--royal-white);
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+        }
+
+        header {
+            background-color: var(--bg-dark);
+            padding: 12px 15px;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 1px solid #1f1f23;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo { font-size: 14px; font-weight: 900; letter-spacing: 1px; text-transform: uppercase; color: var(--neon-green); text-decoration: none; }
+
+        .cart-icon-container {
+            position: relative;
+            text-decoration: none;
+            font-size: 22px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 4px;
+        }
+
+        .cart-badge {
+            position: absolute;
+            top: -2px;
+            right: -6px;
+            background-color: var(--badge-red);
+            color: white;
+            font-size: 10px;
+            font-weight: 800;
+            padding: 1px 5px;
+            border-radius: 10px;
+            min-width: 18px;
+            height: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .cart-badge.hidden {
+            display: none;
+        }
+
+        .section-header { padding: 20px 15px 10px; display: flex; align-items: center; gap: 8px; }
+        .accent-bar { width: 4px; height: 18px; background: var(--neon-green); }
+        .section-title { font-size: 15px; font-weight: 800; text-transform: uppercase; }
+
+        /* Cart Items List */
+        .cart-container { padding: 0 15px; display: flex; flex-direction: column; gap: 12px; }
+
+        .cart-item {
+            background: var(--card-bg);
+            border: 1px solid #1f1f23;
+            border-radius: 12px;
+            padding: 12px;
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .cart-item-img {
+            width: 70px;
+            height: 70px;
+            border-radius: 8px;
+            object-fit: cover;
+            flex-shrink: 0;
+        }
+
+        .cart-item-details {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .cart-item-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--royal-white);
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .cart-item-price {
+            font-size: 14px;
+            font-weight: 800;
+            color: var(--neon-green);
+        }
+
+        .cart-item-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 6px;
+        }
+
+        .qty-btn {
+            background: #18181b;
+            color: var(--royal-white);
+            border: 1px solid #333;
+            width: 24px;
+            height: 24px;
+            border-radius: 6px;
+            font-weight: 800;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .qty-display {
+            font-size: 12px;
+            font-weight: 700;
+            min-width: 16px;
+            text-align: center;
+        }
+
+        .remove-btn {
+            background: transparent;
+            color: #ff3b30;
+            border: none;
+            font-size: 10px;
+            font-weight: 800;
+            cursor: pointer;
+            text-transform: uppercase;
+            margin-left: auto;
+            padding: 4px 8px;
+        }
+
+        /* Empty Cart State */
+        .empty-cart {
+            text-align: center;
+            padding: 50px 20px;
+            color: var(--text-gray);
+        }
+
+        .empty-cart p {
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+
+        .shop-now-btn {
+            background: var(--neon-green);
+            color: black;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 900;
+            text-transform: uppercase;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        /* Checkout Footer Bar */
+        .checkout-footer {
+            position: fixed;
+            bottom: 60px;
+            width: 100%;
+            background: #111114;
+            border-top: 1px solid #1f1f23;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 1000;
+        }
+
+        .checkout-footer.hidden {
+            display: none;
+        }
+
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 14px;
+            font-weight: 800;
+        }
+
+        .total-amount {
+            color: var(--neon-green);
+            font-size: 16px;
+        }
+
+        .checkout-btn {
+            background: var(--neon-green);
+            color: black;
+            border: none;
+            text-align: center;
+            font-size: 11px;
+            font-weight: 900;
+            padding: 12px;
+            border-radius: 8px;
+            text-transform: uppercase;
+            cursor: pointer;
+            width: 100%;
+            text-decoration: none;
+            display: block;
+        }
+
+        /* --- COMPRESSED NAVIGATION --- */
+        .bottom-nav {
+            position: fixed; 
+            bottom: 0; 
+            width: 100%; 
+            background: #0f0f12;
+            display: flex; 
+            justify-content: space-around; 
+            padding: 10px 0; 
+            border-top: 1px solid #1f1f23; 
+            z-index: 1001; 
+            align-items: center;
+        }
+
+        .nav-item { 
+            color: var(--text-gray); 
+            text-decoration: none; 
+            font-size: 10px; 
+            text-align: center;
+            line-height: 1;
+        }
+
+        .nav-item.active { 
+            color: var(--neon-green); 
+        }
+
+        .nav-item img.logo-circle {
+            width: 34px; 
+            height: 34px; 
+            border-radius: 50%; 
+            object-fit: cover; 
+            border: 1px solid #333; 
+            vertical-align: middle;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <a href="merchandise.html" class="logo">Mall of Royal Red Bull</a>
+    <a href="cart.html" class="cart-icon-container">
+        🛒
+        <span class="cart-badge hidden" id="cartBadge">0</span>
+    </a>
+</header>
+
+<div class="section-header">
+    <div class="accent-bar"></div>
+    <div class="section-title">Your Cart</div>
+</div>
+
+<div class="cart-container" id="cartContainer"></div>
+
+<div class="checkout-footer hidden" id="checkoutFooter">
+    <div class="total-row">
+        <span>Total Amount:</span>
+        <span class="total-amount" id="totalAmount">₹0.00</span>
+    </div>
+    <button class="checkout-btn" onclick="proceedToCheckout()">Proceed to Checkout</button>
+</div>
+
+<div class="bottom-nav">
+    <a href="merchandise.html" class="nav-item">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" style="margin-bottom: 4px;"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"></path></svg>
+        <br>Home
+    </a>
+    <a href="bestsellers.html" class="nav-item">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" style="margin-bottom: 4px;"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"></path></svg>
+        <br>Best Sellers
+    </a>
+    <a href="store.html" class="nav-item">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" style="margin-bottom: 4px;"><path d="M20 4H4v2h16V4zm1 10v-2l-1-5H4l-1 5v2h1v6h10v-6h4v6h2v-6h2v-6h1zm-9 4H6v-4h6v4z"></path></svg>
+        <br>Visit Store
+    </a>
+    <a href="index.html" class="nav-item">
+        <img src="logo.png" class="logo-circle" alt="Logo">
+    </a>
+</div>
+
+<script src="products.js"></script>
+<script>
+    function getCart() {
+        return JSON.parse(localStorage.getItem('cart')) || [];
+    }
+
+    function saveCart(cart) {
+        localStorage.setItem('cart', JSON.stringify(cart));
+        renderCart();
+    }
+
+    function updateCartBadge() {
+        const cart = getCart();
+        const totalCount = cart.reduce((sum, item) => sum + (item.quantity || 1), 0);
+        const badge = document.getElementById('cartBadge');
+        
+        if (totalCount > 0) {
+            badge.textContent = totalCount > 99 ? '99+' : totalCount;
+            badge.classList.remove('hidden');
+        } else {
+            badge.classList.add('hidden');
+        }
+    }
+
+    function changeQuantity(productId, delta) {
+        let cart = getCart();
+        let item = cart.find(i => i.id === productId);
+        if (item) {
+            item.quantity = (item.quantity || 1) + delta;
+            if (item.quantity <= 0) {
+                cart = cart.filter(i => i.id !== productId);
+            }
+            saveCart(cart);
+        }
+    }
+
+    function removeItem(productId) {
+        let cart = getCart();
+        cart = cart.filter(i => i.id !== productId);
+        saveCart(cart);
+    }
+
+    function renderCart() {
+        updateCartBadge();
+        const cart = getCart();
+        const container = document.getElementById('cartContainer');
+        const checkoutFooter = document.getElementById('checkoutFooter');
+
+        if (cart.length === 0) {
+            container.innerHTML = `
+                <div class="empty-cart">
+                    <p>Your cart is empty.</p>
+                    <a href="food.html" class="shop-now-btn">Shop Organic Provisions</a>
+                </div>
+            `;
+            checkoutFooter.classList.add('hidden');
+            return;
+        }
+
+        checkoutFooter.classList.remove('hidden');
+
+        // Render cart items
+        container.innerHTML = cart.map(item => `
+            <div class="cart-item">
+                <img src="${item.image}" class="cart-item-img" alt="${item.title}">
+                <div class="cart-item-details">
+                    <div class="cart-item-title">${item.title}</div>
+                    <div class="cart-item-price">${item.price}</div>
+                    <div class="cart-item-controls">
+                        <button class="qty-btn" onclick="changeQuantity('${item.id}', -1)">-</button>
+                        <span class="qty-display">${item.quantity || 1}</span>
+                        <button class="qty-btn" onclick="changeQuantity('${item.id}', 1)">+</button>
+                        <button class="remove-btn" onclick="removeItem('${item.id}')">Remove</button>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+
+        // Calculate total amount
+        let total = cart.reduce((sum, item) => {
+            let numericPrice = parseFloat(item.price.replace(/[^0-9.]/g, '')) || 0;
+            return sum + (numericPrice * (item.quantity || 1));
+        }, 0);
+
+        document.getElementById('totalAmount').textContent = `₹${total.toFixed(2)}`;
+    }
+
+    function proceedToCheckout() {
+        alert('Proceeding to checkout via Instagram / Direct Order!');
+        window.location.href = 'https://instagram.com/myfoodproductsputhukkadai';
+    }
+
+    // Initial render on load
+    renderCart();
+</script>
+
+</body>
+</html>

@@ -72,23 +72,24 @@
             display: flex; align-items: center; justify-content: center;
         }
 
-        /* ================= PROFESSIONAL CART BADGE ================= */
-.cart-icon-container {
+        /* ================= CART ================= */
+.action-bar .cart-icon-container {
     position: relative;
-    text-decoration: none;
-    font-size: 22px;
-    width: 34px;
-    height: 34px;
+    justify-self: end;
+    width: 38px;
+    height: 38px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     padding: 0;
+    font-size: 22px;
+    text-decoration: none;
 }
 
 .cart-badge {
     position: absolute;
-    top: 0;
-    right: 0;
+    top: 1px;
+    right: 1px;
     background: #ff3b30;
     color: #fff;
     font-size: 9px;
@@ -104,7 +105,6 @@
     border: 2px solid #0b0b0f;
     box-shadow: 0 1px 4px rgba(0,0,0,0.35);
     transform: translate(25%, -25%);
-    transition: transform 0.2s ease-in-out;
 }
 
 .cart-badge.pop {

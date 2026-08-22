@@ -409,8 +409,14 @@
 
     renderTrending();
     updateCartBadge();
+
+    // Listen for storage updates across pages in real time
+    window.addEventListener('storage', (event) => {
+        if (event.key === 'cart') {
+            updateCartBadge();
+        }
+    });
 </script>
 
 </body>
-    </html>
-    
+</html>

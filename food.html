@@ -185,7 +185,7 @@
             text-decoration: none; 
             font-size: 10px; 
             text-align: center;
-            line-height: 1; /* Compressed spacing */
+            line-height: 1;
         }
 
         .nav-item.active { 
@@ -453,6 +453,18 @@
             showProduct(productId); 
         }
     });
+
+    // REAL-TIME SYNC: Listen for changes from cart.html or other tabs/pages
+    window.addEventListener('storage', (event) => {
+        if (event.key === 'cart') {
+            updateCartBadge();
+            // Refresh grid buttons and active detail view UI to match new localStorage state
+            renderItems(currentDetailId);
+            if (currentDetailId) {
+                updateCartUI(currentDetailId);
+            }
+        }
+    });
 </script>
 </body>
-  </html>
+</html>
